@@ -1,0 +1,4 @@
+mypy
+types-Flask
+types-Flask-CORS
+types-requests
