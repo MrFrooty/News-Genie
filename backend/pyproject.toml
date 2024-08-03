@@ -1,0 +1,5 @@
+[tool.black]
+line-length = 88
+exclude = '''
+/(myenv|node_modules|.mypy_cache|package-lock.json|package.json)/
+'''
