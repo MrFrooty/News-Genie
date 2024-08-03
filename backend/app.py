@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from database import connect_to_db
-from colorama import init, Fore, Style
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -13,7 +12,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from google.generativeai import GenerativeModel
 import google.generativeai as genai
 
-init(autoreset=True)
 app = Flask(__name__)
 CORS(app)
 
@@ -25,14 +23,8 @@ db = connect_to_db()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = GenerativeModel("gemini-pro")
 
-if db:
-    print(
-        f"{Fore.GREEN}{Style.BRIGHT}Successfully connected to the database!{Style.RESET_ALL}"
-    )
-else:
-    print(
-        f"{Fore.RED}{Style.BRIGHT}Failed to connect to the database.{Style.RESET_ALL}"
-    )
+if db is None:
+    raise Exception("Failed to connect to the database.")
 
 
 @app.route("/register", methods=["POST"])
