@@ -1,4 +1,3 @@
-```markdown
 # News-Genie
 
 News-Genie is a web application designed to fetch and analyze news articles, providing users with insightful and up-to-date news information. The application is split into a backend, developed with Flask in Python, and a frontend built using React, with deployment managed through Vercel.
