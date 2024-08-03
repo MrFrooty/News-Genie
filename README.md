@@ -1,10 +1,3 @@
-Certainly! Below is a properly formatted README file for your "News-Genie" project, suitable for adding to your repository:
-
----
-**README.md**
-
----
-
 ```markdown
 # News-Genie
 
