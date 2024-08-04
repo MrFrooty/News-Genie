@@ -11,7 +11,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ title, description, url }) => {
     <div className="news-card">
       <h2>{title}</h2>
       <p>{description}</p>
-      <a href={url} target="_blank" rel="noopener noreferrer">Read more</a>
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        Read more
+      </a>
     </div>
   );
 };
