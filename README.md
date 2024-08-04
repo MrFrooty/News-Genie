@@ -54,7 +54,7 @@ The frontend structure includes:
    ```bash
    pip install -r requirements.txt
    ```
-4. Be sure to add in your GOOGLE_API_KEY into .env.local
+4. Be sure to add in your GOOGLE_API_KEY into .env
 
 #### Frontend
 
