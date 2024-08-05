@@ -1,21 +1,87 @@
 // pages/index.tsx
 import React, { useRef } from 'react';
+import { useTheme } from 'next-themes';
 import { Parallax, ParallaxLayer, IParallax } from '@react-spring/parallax';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
+import ShimmerButton from '@/components/shimmer-button';
 import { motion } from 'framer-motion';
-import { BentoGrid, BentoGridItem } from '@/components/bento-grid';
+import { Linkedin } from 'lucide-react';
 import Link from 'next/link';
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
 
+interface Engineer {
+  name: string;
+  role: string;
+  image: string;
+  linkedIn: string;
+  blurb: string;
+}
+
+const engineers: Engineer[] = [
+  {
+    name: 'Freddy Song',
+    role: 'Model Engineer, Lead Full-stack Dev',
+    image: '/freddy-song.jpg',
+    linkedIn: 'https://www.linkedin.com/in/freddy-song-428677212/',
+    blurb: 'UCR 2nd Year.\nPersonal Interests: AI/ML, cafe hopping, DJing'
+  },
+  {
+    name: 'Michael Chen',
+    role: 'Lead Model Engineer, Backend Dev',
+    image: '/michael-chen.jpg',
+    linkedIn: 'https://www.linkedin.com/in/michael-luo-chen/',
+    blurb: 'UCR 2nd Year.\nPersonal Interests: AI/ML, gaming, reading novels'
+  }
+];
+
 const LandingPage: React.FC = () => {
   const parallax = useRef<IParallax>(null!);
+  const { theme } = useTheme();
+
+  const renderEngineerCard = (engineer: Engineer) => (
+    <Card key={engineer.name} className="bg-white text-black min-w-[240px]">
+      <CardHeader>
+        <div className="flex items-center space-x-4">
+          <Link
+            href={engineer.linkedIn}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative"
+          >
+            <Avatar className="h-12 w-12 transition-transform group-hover:scale-105">
+              <AvatarImage src={engineer.image} alt={engineer.name} />
+              <AvatarFallback>
+                {engineer.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              <Linkedin className="h-6 w-6 text-white" />
+            </div>
+          </Link>
+          <div className="flex-grow">
+            <CardTitle className="text-lg">{engineer.name}</CardTitle>
+            <CardDescription>{engineer.role}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm whitespace-pre-wrap break-words">{engineer.blurb}</p>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div style={{ width: '100%', height: '100vh', background: '#253237' }}>
       <Parallax ref={parallax} pages={3}>
-        <ParallaxLayer offset={1} speed={1} style={{ backgroundColor: '#805E73' }} />
-        <ParallaxLayer offset={2} speed={1} style={{ backgroundColor: '#87BCDE' }} />
+        <ParallaxLayer offset={1} speed={1} style={{ backgroundColor: '#5f96d9' }} />
+        <ParallaxLayer offset={2} speed={1} style={{ backgroundColor: '#779cc9' }} />
 
         <ParallaxLayer
           offset={0}
@@ -77,7 +143,7 @@ const LandingPage: React.FC = () => {
         <ParallaxLayer
           offset={0}
           speed={0.1}
-          onClick={() => parallax.current.scrollTo(1)}
+          onClick={() => parallax.current.scrollTo(2)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -102,7 +168,6 @@ const LandingPage: React.FC = () => {
         <ParallaxLayer
           offset={1}
           speed={0.1}
-          onClick={() => parallax.current.scrollTo(2)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -118,7 +183,6 @@ const LandingPage: React.FC = () => {
               your interests and preferences. Stay informed with tailored news recommendations and
               real-time analysis.
             </p>
-            <img src={url('bash')} style={{ width: '40%', margin: 'auto' }} alt="Bash" />
           </div>
         </ParallaxLayer>
 
@@ -129,9 +193,9 @@ const LandingPage: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            zIndex: 5
           }}
-          onClick={() => parallax.current.scrollTo(0)}
         >
           <h2
             style={{
@@ -143,34 +207,16 @@ const LandingPage: React.FC = () => {
           >
             Contributors
           </h2>
-          <BentoGrid className="max-w-4xl mb-8">
-            <BentoGridItem title="John Doe" description="Frontend Developer" />
-            <BentoGridItem title="Jane Smith" description="Backend Developer" />
-            <BentoGridItem title="Alex Johnson" description="UI/UX Designer" />
-          </BentoGrid>
-          <Link href="/try-me-out">
-            <button
-              style={{
-                marginTop: '1rem',
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#4299e1',
-                color: 'white',
-                borderRadius: '0.5rem',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                transition: 'background-color 0.3s ease'
-              }}
-            >
-              Take Me to the Project
-            </button>
-          </Link>
-          <img
-            src={url('clients-main')}
-            style={{ width: '40%', marginTop: '2rem' }}
-            alt="Clients"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mb-8">
+            {engineers.map((engineer) => renderEngineerCard(engineer))}
+          </div>
+          <div style={{ position: 'relative', zIndex: 10, marginTop: '2rem' }}>
+            <Link href="/try-me-out">
+              <ShimmerButton className="px-6 py-3 text-lg font-semibold text-black">
+                Take Me to the Project
+              </ShimmerButton>
+            </Link>
+          </div>
         </ParallaxLayer>
       </Parallax>
     </div>

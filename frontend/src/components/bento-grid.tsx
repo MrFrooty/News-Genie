@@ -3,6 +3,7 @@ import { ArrowRightIcon } from '@radix-ui/react-icons';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/button';
+import { MagicCard } from '@/components/magic-card';
 
 const BentoGrid = ({ children, className }: { children: ReactNode; className?: string }) => {
   return (
@@ -63,11 +64,19 @@ const BentoCard = ({
   </div>
 );
 
-const BentoGridItem = ({ title, description }: { title: string; description: string }) => (
-  <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-lg shadow-md">
-    <h3 className="text-xl font-semibold">{title}</h3>
-    <p>{description}</p>
-  </div>
+const BentoGridItem = ({
+  title,
+  description,
+  textColor = 'text-white'
+}: {
+  title: string;
+  description: string;
+  textColor?: string;
+}) => (
+  <MagicCard className="p-4">
+    <h3 className={`${textColor} text-xl font-semibold mb-2`}>{title}</h3>
+    <p className={`${textColor} text-sm`}>{description}</p>
+  </MagicCard>
 );
 
 export { BentoCard, BentoGrid, BentoGridItem };

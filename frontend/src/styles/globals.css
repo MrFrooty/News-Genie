@@ -1,18 +1,28 @@
 /* styles/globals.css */
-html,
-body,
-#__next {
-  height: 100%;
-  width: 100%;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #__next {
+    @apply h-full w-full;
+  }
+
+  html {
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    @apply font-sans m-0;
+  }
 }
 
-body {
-  font-family: system-ui;
-  margin: 0;
-}
-
-*,
-*:after,
-*:before {
-  box-sizing: border-box;
+@layer utilities {
+  * {
+    @apply box-border;
+  }
 }
