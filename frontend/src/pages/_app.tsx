@@ -8,7 +8,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <ThemeProvider attribute="class">
         <Component {...pageProps} />
