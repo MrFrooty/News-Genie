@@ -68,7 +68,7 @@ The frontend structure includes:
    ```
 3. Start the development server:
    ```bash
-   npm start
+   pnpm dev
    ```
 
 ## Deployment
