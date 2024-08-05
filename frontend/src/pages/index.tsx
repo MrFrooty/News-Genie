@@ -24,14 +24,14 @@ interface Engineer {
 const engineers: Engineer[] = [
   {
     name: 'Freddy Song',
-    role: 'Model Engineer, Lead Full-stack Dev',
+    role: 'Lead Full-Stack Dev',
     image: '/freddy-song.jpg',
     linkedIn: 'https://www.linkedin.com/in/freddy-song-428677212/',
     blurb: 'UCR 2nd Year.\nPersonal Interests: AI/ML, cafe hopping, DJing'
   },
   {
     name: 'Michael Chen',
-    role: 'Lead Model Engineer, Backend Dev',
+    role: 'Backend Dev',
     image: '/michael-chen.jpg',
     linkedIn: 'https://www.linkedin.com/in/michael-luo-chen/',
     blurb: 'UCR 2nd Year.\nPersonal Interests: AI/ML, gaming, reading novels'
