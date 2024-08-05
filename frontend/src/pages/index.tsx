@@ -225,7 +225,7 @@ const LandingPage: React.FC = () => {
               color: 'white'
             }}
           >
-            Contributors
+            Meet the brains of News Genie
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mb-8">
             {engineers.map((engineer) => renderEngineerCard(engineer))}
