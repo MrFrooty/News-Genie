@@ -1,14 +1,21 @@
+# app.py
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
-from database import connect_to_db
+from database import (
+    connect_to_firebase,
+    create_user,
+    get_user_by_email,
+    save_user_preferences,
+    get_user_preferences,
+)
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
     jwt_required,
     get_jwt_identity,
 )
-from werkzeug.security import generate_password_hash, check_password_hash
 from google.generativeai import GenerativeModel
 import google.generativeai as genai
 
@@ -18,13 +25,13 @@ CORS(app)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 
-db = connect_to_db()
+db = connect_to_firebase()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = GenerativeModel("gemini-pro")
 
 if db is None:
-    raise Exception("Failed to connect to the database.")
+    raise Exception("Failed to connect to Firebase.")
 
 
 @app.route("/register", methods=["POST"])
@@ -36,17 +43,11 @@ def register():
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
 
-    if db.users.find_one({"email": email}):
+    user_id = create_user(email, password)
+    if user_id is None:
         return jsonify({"error": "Email already exists"}), 400
 
-    hashed_password = generate_password_hash(password)
-    user = {
-        "email": email,
-        "password": hashed_password,
-        "preferences": {"categories": [], "news_outlets": []},
-    }
-    db.users.insert_one(user)
-
+    save_user_preferences(user_id, {"categories": [], "news_outlets": []})
     return jsonify({"message": "User registered successfully"}), 201
 
 
@@ -56,20 +57,20 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = db.users.find_one({"email": email})
-    if user and check_password_hash(user["password"], password):
-        access_token = create_access_token(identity=email)
-        return jsonify(access_token=access_token), 200
-    else:
+    user_id = get_user_by_email(email)
+    if user_id is None:
         return jsonify({"error": "Invalid email or password"}), 401
+
+    access_token = create_access_token(identity=user_id)
+    return jsonify(access_token=access_token), 200
 
 
 @app.route("/profile", methods=["GET"])
 @jwt_required()
 def get_profile():
     current_user = get_jwt_identity()
-    user = db.users.find_one({"email": current_user}, {"_id": 0, "password": 0})
-    return jsonify(user), 200
+    preferences = get_user_preferences(current_user)
+    return jsonify(preferences), 200
 
 
 @app.route("/preferences", methods=["PUT"])
@@ -77,28 +78,12 @@ def get_profile():
 def update_preferences():
     current_user = get_jwt_identity()
     data = request.json
-    categories = data.get("categories", [])
-    news_outlets = data.get("news_outlets", [])
-
-    db.users.update_one(
-        {"email": current_user},
-        {
-            "$set": {
-                "preferences.categories": categories,
-                "preferences.news_outlets": news_outlets,
-            }
-        },
-    )
-
+    preferences = {
+        "categories": data.get("categories", []),
+        "news_outlets": data.get("news_outlets", []),
+    }
+    save_user_preferences(current_user, preferences)
     return jsonify({"message": "Preferences updated successfully"}), 200
-
-
-@app.route("/delete_account", methods=["DELETE"])
-@jwt_required()
-def delete_account():
-    current_user = get_jwt_identity()
-    db.users.delete_one({"email": current_user})
-    return jsonify({"message": "Account deleted successfully"}), 200
 
 
 @app.route("/summarize_news", methods=["POST"])

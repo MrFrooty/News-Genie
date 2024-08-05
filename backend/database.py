@@ -1,44 +1,61 @@
-from pymongo import MongoClient
+# database.py
+
+import firebase_admin
+from firebase_admin import credentials, firestore, auth
 import os
+import json
 from dotenv import load_dotenv
 from colorama import init, Fore, Style
 
 init(autoreset=True)
 load_dotenv()
 
-database_uri = os.getenv("MONGODB_URI")
-user = os.getenv("MONGODB_USER")
-password = os.getenv("MONGODB_PASSWORD")
-
-uri = f"mongodb+srv://{user}:{password}@{database_uri}/?retryWrites=true&w=majority&appName=Dev"
-
-client = MongoClient(uri)
-db = client["news_aggregator"]
+firebase_config = json.loads(os.getenv("FIREBASE_CONFIG"))
 
 
-def connect_to_db():
+def connect_to_firebase():
     try:
-        client.admin.command("ping")
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(firebase_config)
+            firebase_admin.initialize_app(cred)
+        db = firestore.client()
         print(
-            f"{Fore.GREEN}{Style.BRIGHT}Successfully connected to the database!{Style.RESET_ALL}"
+            f"{Fore.GREEN}{Style.BRIGHT}Successfully connected to Firebase!{Style.RESET_ALL}"
         )
         return db
     except Exception as e:
         print(
-            f"{Fore.RED}{Style.BRIGHT}Failed to connect to the database: {e}{Style.RESET_ALL}"
+            f"{Fore.RED}{Style.BRIGHT}Failed to connect to Firebase: {e}{Style.RESET_ALL}"
         )
         return None
 
 
-# ... (rest of the database.py content)
+def create_user(email, password):
+    try:
+        user = auth.create_user(email=email, password=password)
+        return user.uid
+    except auth.EmailAlreadyExistsError:
+        return None
+
+
+def get_user_by_email(email):
+    try:
+        user = auth.get_user_by_email(email)
+        return user.uid
+    except auth.UserNotFoundError:
+        return None
 
 
 def save_user_preferences(user_id, preferences):
-    db.users.update_one(
-        {"_id": user_id}, {"$set": {"preferences": preferences}}, upsert=True
+    db = firestore.client()
+    db.collection("users").document(user_id).set(
+        {"preferences": preferences}, merge=True
     )
 
 
 def get_user_preferences(user_id):
-    user = db.users.find_one({"_id": user_id})
-    return user["preferences"] if user else None
+    db = firestore.client()
+    user_doc = db.collection("users").document(user_id).get()
+    if user_doc.exists:
+        return user_doc.to_dict().get("preferences")
+    return None
