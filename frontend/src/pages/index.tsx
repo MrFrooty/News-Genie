@@ -1,12 +1,12 @@
 // pages/index.tsx
 import React, { useRef } from 'react';
-import { useTheme } from 'next-themes';
 import { Parallax, ParallaxLayer, IParallax } from '@react-spring/parallax';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
 import ShimmerButton from '@/components/shimmer-button';
 import { motion } from 'framer-motion';
 import { Linkedin } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 
@@ -40,7 +40,6 @@ const engineers: Engineer[] = [
 
 const LandingPage: React.FC = () => {
   const parallax = useRef<IParallax>(null!);
-  const { theme } = useTheme();
 
   const renderEngineerCard = (engineer: Engineer) => (
     <Card key={engineer.name} className="bg-white text-black min-w-[240px]">
@@ -94,47 +93,68 @@ const LandingPage: React.FC = () => {
         />
 
         <ParallaxLayer offset={1.3} speed={-0.3} style={{ pointerEvents: 'none' }}>
-          <img
+          <Image
             src={url('satellite4')}
+            width={50}
+            height={50}
+            layout="reponsive"
             style={{ width: '15%', marginLeft: '70%' }}
             alt="Satellite"
           />
         </ParallaxLayer>
 
         <ParallaxLayer offset={1} speed={0.8} style={{ opacity: 0.1 }}>
-          <img
+          <Image
             src={url('cloud')}
+            width={100}
+            height={100}
+            layout="reponsive"
             style={{ display: 'block', width: '20%', marginLeft: '55%' }}
             alt="Cloud"
           />
-          <img
+          <Image
             src={url('cloud')}
+            width={100}
+            height={100}
+            layout="reponsive"
             style={{ display: 'block', width: '10%', marginLeft: '15%' }}
             alt="Cloud"
           />
         </ParallaxLayer>
 
         <ParallaxLayer offset={1.75} speed={0.5} style={{ opacity: 0.1 }}>
-          <img
+          <Image
             src={url('cloud')}
+            width={100}
+            height={100}
+            layout="reponsive"
             style={{ display: 'block', width: '20%', marginLeft: '70%' }}
             alt="Cloud"
           />
-          <img
+          <Image
             src={url('cloud')}
+            width={100}
+            height={100}
+            layout="responsive"
             style={{ display: 'block', width: '20%', marginLeft: '40%' }}
             alt="Cloud"
           />
         </ParallaxLayer>
 
         <ParallaxLayer offset={1} speed={0.2} style={{ opacity: 0.2 }}>
-          <img
+          <Image
             src={url('cloud')}
+            width={100}
+            height={100}
+            layout="responsive"
             style={{ display: 'block', width: '10%', marginLeft: '10%' }}
             alt="Cloud"
           />
-          <img
+          <Image
             src={url('cloud')}
+            width={100}
+            height={100}
+            layout="responsive"
             style={{ display: 'block', width: '20%', marginLeft: '75%' }}
             alt="Cloud"
           />
@@ -161,7 +181,7 @@ const LandingPage: React.FC = () => {
             >
               News Genie
             </h1>
-            <img src={url('server')} style={{ width: '20%', margin: 'auto' }} alt="Server" />
+            {/* <Image src={url('server')} width={20} height={20} layout="responsive" style={{ width: '10%', margin: 'auto'}} alt="Server" /> */}
           </motion.div>
         </ParallaxLayer>
 

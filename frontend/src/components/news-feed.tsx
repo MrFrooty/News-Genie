@@ -1,5 +1,4 @@
 import React from 'react';
-import NewsCard from './news-card';
 
 const NewsFeed: React.FC = () => {
   return (

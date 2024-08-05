@@ -13,6 +13,10 @@ const BentoGrid = ({ children, className }: { children: ReactNode; className?: s
   );
 };
 
+type IconProps = {
+  className?: string;
+};
+
 const BentoCard = ({
   name,
   className,
@@ -25,7 +29,7 @@ const BentoCard = ({
   name: string;
   className: string;
   background: ReactNode;
-  Icon: any;
+  Icon: React.ElementType<IconProps>;
   description: string;
   href: string;
   cta: string;
