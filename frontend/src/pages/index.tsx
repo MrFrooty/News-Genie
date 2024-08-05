@@ -27,14 +27,14 @@ const engineers: Engineer[] = [
     role: 'Lead Full-Stack Dev',
     image: '/freddy-song.jpg',
     linkedIn: 'https://www.linkedin.com/in/freddy-song-428677212/',
-    blurb: 'UCR 2nd Year.\nPersonal Interests: AI/ML, cafe hopping, DJing'
+    blurb: 'UCR 3rd Year.\nPersonal Interests: AI/ML, cafe hopping, DJing'
   },
   {
     name: 'Michael Chen',
-    role: 'Backend Dev',
+    role: 'Frontend Dev',
     image: '/michael-chen.jpg',
     linkedIn: 'https://www.linkedin.com/in/michael-luo-chen/',
-    blurb: 'UCR 2nd Year.\nPersonal Interests: AI/ML, gaming, reading novels'
+    blurb: 'UCR 3rd Year.\nPersonal Interests: AI/ML, gaming, reading novels'
   }
 ];
 
