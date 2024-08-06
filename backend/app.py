@@ -12,6 +12,8 @@ from database import (
     get_user_by_email,
     save_user_preferences,
     get_user_preferences,
+    get_user_by_id,
+    delete_all_users,
 )
 from flask_jwt_extended import (
     JWTManager,
@@ -26,7 +28,7 @@ from news_analyzer import summarize_news, generate_headlines
 from news_fetcher import fetch_news
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}}) 
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 logging.basicConfig(
@@ -70,11 +72,12 @@ def register():
     data = request.json
     email = data.get("email")
     password = data.get("password")
+    first_name = data.get("first_name")
 
-    if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
+    if not email or not password or not first_name:
+        return jsonify({"error": "Email, password, and first name are required"}), 400
 
-    user_id = create_user(email, password)
+    user_id = create_user(email, password, first_name)
     if user_id is None:
         return jsonify({"error": "Email already exists"}), 400
 
@@ -97,7 +100,7 @@ def login():
 
     expires = timedelta(hours=1)
     access_token = create_access_token(identity=user["uid"], expires_delta=expires)
-    return jsonify(access_token=access_token), 200
+    return jsonify(access_token=access_token, first_name=user["first_name"]), 200
 
 
 @app.route("/api/logout", methods=["POST"])
@@ -112,8 +115,10 @@ def logout():
 @jwt_required()
 def get_profile():
     current_user = get_jwt_identity()
-    preferences = get_user_preferences(current_user)
-    return jsonify(preferences), 200
+    user_data = get_user_by_id(current_user)
+    if user_data:
+        return jsonify(user_data), 200
+    return jsonify({"error": "User not found"}), 404
 
 
 @app.route("/api/preferences", methods=["PUT"])
@@ -157,6 +162,15 @@ def fetch_news_route():
     logger.info(f"User context used: {user_context}")
     news_summaries = fetch_news(topic, user_context)
     return jsonify({"news_summaries": news_summaries})
+
+
+@app.route("/api/delete_all_users", methods=["POST"])
+def delete_all_users_route():
+    try:
+        delete_all_users()
+        return jsonify({"message": "All users deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete users: {str(e)}"}), 500
 
 
 if __name__ == "__main__":

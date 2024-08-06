@@ -32,7 +32,7 @@ def connect_to_firebase():
         return None
 
 
-def create_user(email, password):
+def create_user(email, password, first_name):
     try:
         user = auth.create_user(email=email, password=password)
         db = firestore.client()
@@ -42,6 +42,7 @@ def create_user(email, password):
                 "password_hash": generate_password_hash(
                     password, method="pbkdf2:sha256"
                 ),
+                "first_name": first_name,
             }
         )
         return user.uid
@@ -56,10 +57,44 @@ def get_user_by_email(email):
         user_doc = db.collection("users").document(user.uid).get()
         if user_doc.exists:
             user_data = user_doc.to_dict()
-            return {"uid": user.uid, "password_hash": user_data.get("password_hash")}
+            return {
+                "uid": user.uid,
+                "password_hash": user_data.get("password_hash"),
+                "first_name": user_data.get("first_name"),
+            }
         return None
     except auth.UserNotFoundError:
         return None
+
+
+def get_user_by_id(user_id):
+    db = firestore.client()
+    user_doc = db.collection("users").document(user_id).get()
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        return {
+            "email": user_data.get("email"),
+            "first_name": user_data.get("first_name"),
+            "preferences": user_data.get("preferences", {}),
+        }
+    return None
+
+
+def delete_all_users():
+    db = firestore.client()
+
+    users_ref = db.collection("users")
+    docs = users_ref.get()
+    for doc in docs:
+        doc.reference.delete()
+
+    page = auth.list_users()
+    while page:
+        for user in page.users:
+            auth.delete_user(user.uid)
+        page = page.get_next_page()
+
+    return True
 
 
 def save_user_preferences(user_id, preferences):
