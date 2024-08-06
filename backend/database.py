@@ -6,6 +6,8 @@ import os
 import json
 from dotenv import load_dotenv
 from colorama import init, Fore, Style
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 init(autoreset=True)
 load_dotenv()
@@ -33,6 +35,15 @@ def connect_to_firebase():
 def create_user(email, password):
     try:
         user = auth.create_user(email=email, password=password)
+        db = firestore.client()
+        db.collection("users").document(user.uid).set(
+            {
+                "email": email,
+                "password_hash": generate_password_hash(
+                    password, method="pbkdf2:sha256"
+                ),
+            }
+        )
         return user.uid
     except auth.EmailAlreadyExistsError:
         return None
@@ -41,7 +52,12 @@ def create_user(email, password):
 def get_user_by_email(email):
     try:
         user = auth.get_user_by_email(email)
-        return user.uid
+        db = firestore.client()
+        user_doc = db.collection("users").document(user.uid).get()
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            return {"uid": user.uid, "password_hash": user_data.get("password_hash")}
+        return None
     except auth.UserNotFoundError:
         return None
 

@@ -19,12 +19,25 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
     verify_jwt_in_request,
+    unset_jwt_cookies,
 )
+from werkzeug.security import check_password_hash
 from news_analyzer import summarize_news, generate_headlines
 from news_fetcher import fetch_news
 
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [
+                "https://news-genie.vercel.app",
+                "http://localhost:3000",
+                "http://127.0.0.1:5000",
+            ]
+        }
+    },
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,7 +75,7 @@ def get_user_context():
     return ""
 
 
-@app.route("/register", methods=["POST"])
+@app.route("/api/register", methods=["POST"])
 def register():
     data = request.json
     email = data.get("email")
@@ -79,22 +92,33 @@ def register():
     return jsonify({"message": "User registered successfully"}), 201
 
 
-@app.route("/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def login():
     data = request.json
     email = data.get("email")
     password = data.get("password")
 
-    user_id = get_user_by_email(email)
-    if user_id is None:
+    user = get_user_by_email(email)
+    if user is None:
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    if not check_password_hash(user["password_hash"], password):
         return jsonify({"error": "Invalid email or password"}), 401
 
     expires = timedelta(hours=1)
-    access_token = create_access_token(identity=user_id, expires_delta=expires)
+    access_token = create_access_token(identity=user["uid"], expires_delta=expires)
     return jsonify(access_token=access_token), 200
 
 
-@app.route("/profile", methods=["GET"])
+@app.route("/api/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    response = jsonify({"message": "Successfully logged out"})
+    unset_jwt_cookies(response)
+    return response, 200
+
+
+@app.route("/api/profile", methods=["GET"])
 @jwt_required()
 def get_profile():
     current_user = get_jwt_identity()
@@ -102,7 +126,7 @@ def get_profile():
     return jsonify(preferences), 200
 
 
-@app.route("/preferences", methods=["PUT"])
+@app.route("/api/preferences", methods=["PUT"])
 @jwt_required()
 def update_preferences():
     current_user = get_jwt_identity()
@@ -115,7 +139,7 @@ def update_preferences():
     return jsonify({"message": "Preferences updated successfully"}), 200
 
 
-@app.route("/summarize_news", methods=["POST"])
+@app.route("/api/summarize_news", methods=["POST"])
 def summarize_news_route():
     data = request.json
     article_text = data.get("article_text", "")
@@ -123,7 +147,7 @@ def summarize_news_route():
     return jsonify({"summary": summary})
 
 
-@app.route("/generate_headlines", methods=["POST"])
+@app.route("/api/generate_headlines", methods=["POST"])
 def generate_headlines_route():
     data = request.json
     topic = data.get("topic", "")
@@ -134,7 +158,7 @@ def generate_headlines_route():
     return jsonify({"headlines": headlines})
 
 
-@app.route("/fetch_news", methods=["POST"])
+@app.route("/api/fetch_news", methods=["POST"])
 def fetch_news_route():
     data = request.json
     topic = data.get("topic", "")

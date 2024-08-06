@@ -54,7 +54,12 @@ The frontend structure includes:
    ```bash
    pip install -r requirements.txt
    ```
-4. Be sure to add in your GOOGLE_API_KEY into .env
+4. Start the server using:
+   ```bash
+   python app.py
+   ```
+
+5. Be sure to add in your GOOGLE_API_KEY into .env
 
 #### Frontend
 
@@ -74,7 +79,7 @@ The frontend structure includes:
 ## Deployment
 
 - The frontend is deployed using Vercel. To deploy your frontend, push the changes to your GitHub repository and connect it with Vercel.
-- The backend can be deployed using a preferred cloud service provider like Heroku, AWS, or Google Cloud.
+- The backend is deployed through local server on Flask. 
 
 ## Contributing
 
