@@ -3,7 +3,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Label } from '@/components/label';
 import { Input } from '@/components/input';
 import { Button } from '@/components/button';
-import { motion } from 'framer-motion';
+import { Avatar, AvatarFallback } from '@/components/avatar';
+import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
@@ -11,49 +14,80 @@ const url = (name: string, wrap = false) =>
 export default function SettingsPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [newsOutlets, setNewsOutlets] = useState<string[]>([]);
+  const [firstName, setFirstName] = useState('');
+
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: '',
+    variant: 'default' as 'default' | 'destructive'
+  });
 
   useEffect(() => {
-    // Fetch user preferences when component mounts
     fetchUserPreferences();
   }, []);
 
+  const showAlert = (message: string, variant: 'default' | 'destructive') => {
+    setAlertInfo({
+      show: true,
+      message,
+      variant
+    });
+    setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
+  };
+
   const fetchUserPreferences = async () => {
     try {
-      const response = await fetch('/profile', {
-        method: 'GET',
+      const response = await axios.get('http://127.0.0.1:5000/api/profile', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data.categories || []);
-        setNewsOutlets(data.news_outlets || []);
+      if (response.status === 200) {
+        const data = response.data;
+        setCategories(data.preferences.categories || []);
+        setNewsOutlets(data.preferences.news_outlets || []);
+        setFirstName(data.first_name || '');
+        localStorage.setItem('first_name', data.first_name || '');
       }
     } catch (error) {
-      console.error('Error fetching user preferences:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        showAlert(
+          error.response.data.error || 'An error occurred fetching preferences',
+          'destructive'
+        );
+      } else {
+        showAlert('An unexpected error occurred fetching preferences', 'destructive');
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/preferences', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify({
+      const response = await axios.put(
+        'http://127.0.0.1:5000/api/preferences',
+        {
           categories,
           news_outlets: newsOutlets
-        })
-      });
-      if (response.ok) {
-        alert('Preferences updated successfully');
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        showAlert('Preferences updated successfully', 'default');
       }
     } catch (error) {
-      console.error('Error updating preferences:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        showAlert(
+          error.response.data.error || 'An error occurred updating preferences',
+          'destructive'
+        );
+      } else {
+        showAlert('An unexpected error occurred updating preferences', 'destructive');
+      }
     }
   };
 
@@ -75,10 +109,19 @@ export default function SettingsPage() {
           style={{ width: '400px' }}
         >
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white">User Settings</CardTitle>
-            <CardDescription className="text-gray-300">
-              Manage your news preferences
-            </CardDescription>
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-12 w-12 bg-gray-700">
+                <AvatarFallback className="text-white text-lg">
+                  {firstName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl font-bold text-white">User Settings</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Manage your news preferences
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -122,6 +165,25 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </motion.div>
+      <AnimatePresence>
+        {alertInfo.show && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-8 right-8 w-auto z-50"
+            style={{ transform: 'translateX(100%)' }}
+          >
+            <Alert variant={alertInfo.variant} className="border bg-background text-foreground">
+              <AlertTitle className="text-lg font-semibold">
+                {alertInfo.variant === 'destructive' ? 'Error' : 'Success'}
+              </AlertTitle>
+              <AlertDescription className="text-sm">{alertInfo.message}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

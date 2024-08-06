@@ -8,6 +8,7 @@ import { Linkedin, X, Check, Telescope, LogIn, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 import { Dock, DockIcon } from '@/components/dock';
 import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
@@ -53,7 +54,12 @@ const LoginStatusCard = ({
     message: '',
     variant: 'default' as 'default' | 'destructive'
   });
+  const [firstName, setFirstName] = useState('');
   const router = useRouter();
+
+  React.useEffect(() => {
+    fetchUser();
+  }, []);
 
   const handleClick = () => {
     if (isLoggedIn) {
@@ -77,7 +83,7 @@ const LoginStatusCard = ({
         }
       });
       if (response.ok) {
-        localStorage.removeItem('access_token');
+        localStorage.clear();
         setIsLoggedIn(false);
         router.push('/');
         setAlertInfo({
@@ -100,6 +106,35 @@ const LoginStatusCard = ({
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/api/profile', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setFirstName(data.first_name || '');
+        localStorage.setItem('first_name', data.first_name || '');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setAlertInfo({
+          show: true,
+          message: error.response.data.error || 'An error occurred fetching preferences',
+          variant: 'destructive'
+        });
+      } else {
+        setAlertInfo({
+          show: true,
+          message: 'An unexpected error occurred fetching preferences',
+          variant: 'destructive'
+        });
+      }
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -110,9 +145,10 @@ const LoginStatusCard = ({
         <Card className="absolute top-4 right-4 bg-gray-800/30 border-gray-700/30 hover:bg-gray-800/50 transition-colors duration-200 cursor-pointer">
           <CardContent className="p-2 flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/default-avatar.png" alt="User Avatar" />
-                <AvatarFallback>U</AvatarFallback>
+              <Avatar className="h-8 w-8 bg-gray-700">
+                <AvatarFallback className="text-white">
+                  {isLoggedIn ? firstName.charAt(0).toUpperCase() : 'U'}
+                </AvatarFallback>
               </Avatar>
               {isLoggedIn && <Check className="text-green-500 h-4 w-4" />}
             </div>
@@ -139,11 +175,11 @@ const LoginStatusCard = ({
             className="fixed bottom-8 right-8 w-auto z-50"
             style={{ transform: 'translateX(100%)' }}
           >
-            <Alert variant={alertInfo.variant}>
-              <AlertTitle>
-                {alertInfo.variant === 'destructive' ? 'Action Required' : 'Success'}
+            <Alert variant={alertInfo.variant} className="border bg-background text-foreground">
+              <AlertTitle className="text-lg font-semibold">
+                {alertInfo.variant === 'destructive' ? 'Error' : 'Success'}
               </AlertTitle>
-              <AlertDescription>{alertInfo.message}</AlertDescription>
+              <AlertDescription className="text-sm">{alertInfo.message}</AlertDescription>
             </Alert>
           </motion.div>
         )}

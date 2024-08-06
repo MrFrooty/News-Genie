@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
   const [alertInfo, setAlertInfo] = useState({
     show: false,
     message: '',
@@ -43,17 +44,24 @@ export default function AuthPage() {
       return;
     }
 
+    if (!isLogin && !firstName) {
+      showAlert('First name is required', 'destructive');
+      return;
+    }
+
     const endpoint = isLogin ? '/api/login' : '/api/register';
 
     try {
       const response = await axios.post(`http://127.0.0.1:5000${endpoint}`, {
         email,
-        password
+        password,
+        first_name: firstName
       });
 
       if (response.status === 200 || response.status === 201) {
         if (isLogin) {
           localStorage.setItem('access_token', response.data.access_token);
+          localStorage.setItem('user_name', response.data.first_name);
           showAlert('Login successful', 'default');
           setTimeout(() => {
             window.location.href = '/';
@@ -76,6 +84,7 @@ export default function AuthPage() {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setFirstName('');
   };
 
   return (
@@ -126,6 +135,22 @@ export default function AuthPage() {
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-white">
+                    First Name
+                  </Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="John"
+                    required
+                    className="bg-gray-700 text-white border-gray-600 rounded"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white">
                   Email
@@ -196,9 +221,11 @@ export default function AuthPage() {
             className="fixed bottom-8 right-8 w-auto z-50"
             style={{ transform: 'translateX(100%)' }}
           >
-            <Alert variant={alertInfo.variant}>
-              <AlertTitle>{alertInfo.variant === 'destructive' ? 'Error' : 'Success'}</AlertTitle>
-              <AlertDescription>{alertInfo.message}</AlertDescription>
+            <Alert variant={alertInfo.variant} className="border bg-background text-foreground">
+              <AlertTitle className="text-lg font-semibold">
+                {alertInfo.variant === 'destructive' ? 'Error' : 'Success'}
+              </AlertTitle>
+              <AlertDescription className="text-sm">{alertInfo.message}</AlertDescription>
             </Alert>
           </motion.div>
         )}
