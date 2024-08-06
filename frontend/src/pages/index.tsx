@@ -1,14 +1,19 @@
 // pages/index.tsx
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Parallax, ParallaxLayer, IParallax } from '@react-spring/parallax';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
 import ShimmerButton from '@/components/shimmer-button';
-import { motion } from 'framer-motion';
-import { Linkedin } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Linkedin, X, Check, Telescope, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
+import { Dock, DockIcon } from '@/components/dock';
+import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
+import { Button } from '@/components/button';
+import BlurFade from '@/components/blur-fade';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
@@ -24,22 +29,86 @@ interface Engineer {
 const engineers: Engineer[] = [
   {
     name: 'Freddy Song',
-    role: 'Lead Full-Stack Dev',
+    role: 'Lead Full-Stack Engineer',
     image: '/freddy-song.jpg',
     linkedIn: 'https://www.linkedin.com/in/freddy-song-428677212/',
     blurb: 'UCR 3rd Year.\nPersonal Interests: AI/ML, cafe hopping, DJing'
   },
   {
     name: 'Michael Chen',
-    role: 'Frontend Dev',
+    role: 'Frontend Engineer',
     image: '/michael-chen.jpg',
     linkedIn: 'https://www.linkedin.com/in/michael-luo-chen/',
     blurb: 'UCR 3rd Year.\nPersonal Interests: AI/ML, gaming, reading novels'
   }
 ];
 
+const LoginStatusCard = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
+  const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (isLoggedIn) {
+      router.push('/settings');
+    } else {
+      setAlertInfo({
+        show: true,
+        message: 'You need to be logged in to access the settings page.'
+      });
+      setTimeout(() => setAlertInfo({ show: false, message: '' }), 3000);
+    }
+  };
+
+  return (
+    <>
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        onClick={handleClick}
+      >
+        <Card className="absolute top-4 right-4 bg-gray-800/30 border-gray-700/30 hover:bg-gray-800/50 transition-colors duration-200 cursor-pointer">
+          <CardContent className="p-2 flex items-center space-x-2">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src="/default-avatar.png" alt="User Avatar" />
+              <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+            {isLoggedIn ? (
+              <Check className="text-green-500 h-4 w-4" />
+            ) : (
+              <X className="text-red-500 h-4 w-4" />
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+      <AnimatePresence>
+        {alertInfo.show && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-8 right-8 w-auto z-50"
+            style={{ transform: 'translateX(100%)' }}
+          >
+            <Alert variant="destructive">
+              <AlertTitle>Action Required</AlertTitle>
+              <AlertDescription>{alertInfo.message}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
 const LandingPage: React.FC = () => {
   const parallax = useRef<IParallax>(null!);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   const renderEngineerCard = (engineer: Engineer) => (
     <Card key={engineer.name} className="bg-white text-black min-w-[240px]">
@@ -163,9 +232,10 @@ const LandingPage: React.FC = () => {
         <ParallaxLayer
           offset={0}
           speed={0.1}
-          onClick={() => parallax.current.scrollTo(2)}
+          // onClick={() => parallax.current.scrollTo(2)}
           style={{
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center'
           }}
@@ -181,7 +251,30 @@ const LandingPage: React.FC = () => {
             >
               News Genie
             </h1>
-            {/* <Image src={url('server')} width={20} height={20} layout="responsive" style={{ width: '10%', margin: 'auto'}} alt="Server" /> */}
+            <Dock className="bg-white/5 backdrop-blur-sm border-gray-700/30 absolute left-1/2 transform -translate-x-1/2 p-2 rounded-full flex space-x-4">
+              <DockIcon className="w-10 h-10 flex items-center justify-center" />
+              <DockIcon className="w-10 h-10 flex items-center justify-center">
+                <Telescope
+                  onClick={() => parallax.current.scrollTo(2)}
+                  className="text-white h-8 w-8"
+                />
+              </DockIcon>
+              <DockIcon className="w-10 h-10 flex items-center justify-center">
+                <Link href="/login">
+                  <LogIn className="text-white h-8 w-8" />
+                </Link>
+              </DockIcon>
+              <DockIcon className="w-10 h-10 flex items-center justify-center" />
+            </Dock>
+          </motion.div>
+          {/* need to add for login check state for the status card */}
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            style={{ position: 'absolute', top: '1rem', right: '1rem' }}
+          >
+            <LoginStatusCard isLoggedIn={isLoggedIn} />
           </motion.div>
         </ParallaxLayer>
 
