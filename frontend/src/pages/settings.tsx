@@ -70,7 +70,10 @@ export default function SettingsPage() {
         animate={{ opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 1 }}
       >
-        <Card className="w-full max-w-2xl bg-gray-800/50 border-gray-700/30">
+        <Card
+          className="w-full max-w-2xl bg-gray-800/50 border-gray-700/30"
+          style={{ width: '400px' }}
+        >
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-white">User Settings</CardTitle>
             <CardDescription className="text-gray-300">

@@ -4,7 +4,7 @@ import { Parallax, ParallaxLayer, IParallax } from '@react-spring/parallax';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
 import ShimmerButton from '@/components/shimmer-button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Linkedin, X, Check, Telescope, LogIn } from 'lucide-react';
+import { Linkedin, X, Check, Telescope, LogIn, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -12,8 +12,6 @@ import { useRouter } from 'next/router';
 import { Dock, DockIcon } from '@/components/dock';
 import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
-import { Button } from '@/components/button';
-import BlurFade from '@/components/blur-fade';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
@@ -43,8 +41,18 @@ const engineers: Engineer[] = [
   }
 ];
 
-const LoginStatusCard = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
-  const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
+const LoginStatusCard = ({
+  isLoggedIn,
+  setIsLoggedIn
+}: {
+  isLoggedIn: boolean;
+  setIsLoggedIn: (value: boolean) => void;
+}) => {
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: '',
+    variant: 'default' as 'default' | 'destructive'
+  });
   const router = useRouter();
 
   const handleClick = () => {
@@ -53,9 +61,42 @@ const LoginStatusCard = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
     } else {
       setAlertInfo({
         show: true,
-        message: 'You need to be logged in to access the settings page.'
+        message: 'You need to be logged in to access the settings page.',
+        variant: 'destructive'
       });
-      setTimeout(() => setAlertInfo({ show: false, message: '' }), 3000);
+      setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+      if (response.ok) {
+        localStorage.removeItem('access_token');
+        setIsLoggedIn(false);
+        router.push('/');
+        setAlertInfo({
+          show: true,
+          message: 'Successfully logged out.',
+          variant: 'default'
+        });
+        setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
+      } else {
+        throw new Error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      setAlertInfo({
+        show: true,
+        message: 'Failed to logout. Please try again.',
+        variant: 'destructive'
+      });
+      setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
     }
   };
 
@@ -67,16 +108,24 @@ const LoginStatusCard = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
         onClick={handleClick}
       >
         <Card className="absolute top-4 right-4 bg-gray-800/30 border-gray-700/30 hover:bg-gray-800/50 transition-colors duration-200 cursor-pointer">
-          <CardContent className="p-2 flex items-center space-x-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/default-avatar.png" alt="User Avatar" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            {isLoggedIn ? (
-              <Check className="text-green-500 h-4 w-4" />
-            ) : (
-              <X className="text-red-500 h-4 w-4" />
+          <CardContent className="p-2 flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/default-avatar.png" alt="User Avatar" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              {isLoggedIn && <Check className="text-green-500 h-4 w-4" />}
+            </div>
+            {isLoggedIn && (
+              <LogOut
+                className="text-white h-4 w-4 cursor-pointer ml-auto"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}
+              />
             )}
+            {!isLoggedIn && <X className="text-red-500 h-4 w-4" />}
           </CardContent>
         </Card>
       </motion.div>
@@ -90,8 +139,10 @@ const LoginStatusCard = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
             className="fixed bottom-8 right-8 w-auto z-50"
             style={{ transform: 'translateX(100%)' }}
           >
-            <Alert variant="destructive">
-              <AlertTitle>Action Required</AlertTitle>
+            <Alert variant={alertInfo.variant}>
+              <AlertTitle>
+                {alertInfo.variant === 'destructive' ? 'Action Required' : 'Success'}
+              </AlertTitle>
               <AlertDescription>{alertInfo.message}</AlertDescription>
             </Alert>
           </motion.div>
@@ -274,7 +325,7 @@ const LandingPage: React.FC = () => {
             transition={{ delay: 0.5, duration: 0.5 }}
             style={{ position: 'absolute', top: '1rem', right: '1rem' }}
           >
-            <LoginStatusCard isLoggedIn={isLoggedIn} />
+            <LoginStatusCard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
           </motion.div>
         </ParallaxLayer>
 
