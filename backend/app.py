@@ -26,18 +26,8 @@ from news_analyzer import summarize_news, generate_headlines
 from news_fetcher import fetch_news
 
 app = Flask(__name__)
-CORS(
-    app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                "https://news-genie.vercel.app",
-                "http://localhost:3000",
-                "http://127.0.0.1:5000",
-            ]
-        }
-    },
-)
+CORS(app, resources={r"/api/*": {"origins": "*"}}) 
+
 
 logging.basicConfig(
     level=logging.INFO,
