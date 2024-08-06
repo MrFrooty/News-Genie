@@ -54,7 +54,7 @@ const LoginStatusCard = ({
     message: '',
     variant: 'default' as 'default' | 'destructive'
   });
-  const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstName] = useState('U');
   const router = useRouter();
 
   React.useEffect(() => {
@@ -115,19 +115,19 @@ const LoginStatusCard = ({
       });
       if (response.status === 200) {
         const data = response.data;
-        setFirstName(data.first_name || '');
-        localStorage.setItem('first_name', data.first_name || '');
+        setFirstName(data.first_name || 'U');
+        localStorage.setItem('first_name', data.first_name || 'U');
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         setAlertInfo({
-          show: true,
+          show: false,
           message: error.response.data.error || 'An error occurred fetching preferences',
           variant: 'destructive'
         });
       } else {
         setAlertInfo({
-          show: true,
+          show: false,
           message: 'An unexpected error occurred fetching preferences',
           variant: 'destructive'
         });

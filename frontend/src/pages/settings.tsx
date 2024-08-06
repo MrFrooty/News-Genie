@@ -14,7 +14,7 @@ const url = (name: string, wrap = false) =>
 export default function SettingsPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [newsOutlets, setNewsOutlets] = useState<string[]>([]);
-  const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstName] = useState('U');
 
   const [alertInfo, setAlertInfo] = useState({
     show: false,
