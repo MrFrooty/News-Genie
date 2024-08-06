@@ -1,48 +1,32 @@
-import requests
-from bs4 import BeautifulSoup
+# news_fetcher.py
+
+from gemini_utils import generate_content
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
-def fetch_news_from_api(api_url):
-    response = requests.get(api_url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
+def fetch_news(topic, user_context=""):
+    system_context = f"""
+    Objective: Provide a summary of the biggest news topics based on the user's input and account preferences (if available). The summary should be tailored to the user's interests, covering specific topics and news sources, and should maintain a professional yet relaxed tone. All information must be verifiable and cited.
+    Instructions:
+    1. Select the five biggest news topics that are currently trending and relevant to the user's input and preferences (if available).
+    2. Ensure the news selected is current and from credible sources that can be cited.
+    3. Always return summaries for exactly five news topics.
+    4. Maintain a professional yet relaxed tone in the response.
+    5. Engage the user with concise and clear summaries of the news topics.
+    6. Every piece of news must include a citation from a credible source.
+    7. Include the name of the news source and, if applicable, a link to the original article.
+    User Context: {user_context}
+    """
+    logger.info(f"Fetching news for topic: {topic}")
+    logger.info(f"User context: {user_context}")
 
+    prompt = f"Topic: {topic}\n\n:"
 
-def fetch_news_from_rss(rss_url):
-    response = requests.get(rss_url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.content, features="xml")
-        articles = soup.findAll("item")
-        news_list = []
-        for article in articles:
-            news = {
-                "title": article.title.text,
-                "description": article.description.text,
-                "link": article.link.text,
-                "published": article.pubDate.text,
-            }
-            news_list.append(news)
-        return news_list
-    else:
-        return None
+    full_prompt = f"{system_context}\n\n{prompt}"
 
-
-def fetch_news_from_website(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.content, "html.parser")
-        # This is a basic implementation and might need to be customized for each website
-        articles = soup.find_all("article")
-        news_list = []
-        for article in articles:
-            title = article.find("h2").text if article.find("h2") else "No title"
-            description = (
-                article.find("p").text if article.find("p") else "No description"
-            )
-            link = article.find("a")["href"] if article.find("a") else "#"
-            news_list.append({"title": title, "description": description, "link": link})
-        return news_list
-    else:
-        return None
+    return generate_content(full_prompt)

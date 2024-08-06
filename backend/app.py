@@ -3,6 +3,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
+import logging
+import sys
+from datetime import timedelta
 from database import (
     connect_to_firebase,
     create_user,
@@ -15,23 +18,48 @@ from flask_jwt_extended import (
     create_access_token,
     jwt_required,
     get_jwt_identity,
+    verify_jwt_in_request,
 )
-from google.generativeai import GenerativeModel
-import google.generativeai as genai
+from news_analyzer import summarize_news, generate_headlines
+from news_fetcher import fetch_news
 
 app = Flask(__name__)
 CORS(app)
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
+)
+logger = logging.getLogger(__name__)
+
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
 db = connect_to_firebase()
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = GenerativeModel("gemini-pro")
-
 if db is None:
     raise Exception("Failed to connect to Firebase.")
+
+
+def get_user_context():
+    try:
+        verify_jwt_in_request(optional=True)
+        current_user = get_jwt_identity()
+        if current_user:
+            preferences = get_user_preferences(current_user)
+            context = (
+                f"The user prefers news about {', '.join(preferences.get('categories', []))} "
+                f"from sources like {', '.join(preferences.get('news_outlets', []))}. "
+            )
+            logger.info(f"User context retrieved: {context}")
+            return context
+        else:
+            logger.info("No user context available (user not authenticated)")
+    except Exception as e:
+        logger.error(f"Error retrieving user context: {str(e)}")
+    return ""
 
 
 @app.route("/register", methods=["POST"])
@@ -61,7 +89,8 @@ def login():
     if user_id is None:
         return jsonify({"error": "Invalid email or password"}), 401
 
-    access_token = create_access_token(identity=user_id)
+    expires = timedelta(hours=1)
+    access_token = create_access_token(identity=user_id, expires_delta=expires)
     return jsonify(access_token=access_token), 200
 
 
@@ -87,26 +116,33 @@ def update_preferences():
 
 
 @app.route("/summarize_news", methods=["POST"])
-def summarize_news():
+def summarize_news_route():
     data = request.json
     article_text = data.get("article_text", "")
-
-    prompt = f"Summarize the following news article in 3-4 sentences:\n\n{article_text}"
-    response = model.generate_content(prompt)
-
-    return jsonify({"summary": response.text})
+    summary = summarize_news(article_text)
+    return jsonify({"summary": summary})
 
 
 @app.route("/generate_headlines", methods=["POST"])
-def generate_headlines():
+def generate_headlines_route():
     data = request.json
     topic = data.get("topic", "")
-
-    prompt = f"Generate 5 catchy news headlines about {topic}"
-    response = model.generate_content(prompt)
-
-    headlines = response.text.split("\n")
+    user_context = get_user_context()
+    logger.info(f"Generating headlines for topic: {topic}")
+    logger.info(f"User context used: {user_context}")
+    headlines = generate_headlines(topic, user_context)
     return jsonify({"headlines": headlines})
+
+
+@app.route("/fetch_news", methods=["POST"])
+def fetch_news_route():
+    data = request.json
+    topic = data.get("topic", "")
+    user_context = get_user_context()
+    logger.info(f"Fetching news for topic: {topic}")
+    logger.info(f"User context used: {user_context}")
+    news_summaries = fetch_news(topic, user_context)
+    return jsonify({"news_summaries": news_summaries})
 
 
 if __name__ == "__main__":
