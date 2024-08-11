@@ -53,6 +53,7 @@ The frontend structure includes:
 3. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
+   pip install -r requirements-dev.txt (if you are in Dev mode)
    ```
 4. Start the server using:
    ```bash
@@ -79,7 +80,7 @@ The frontend structure includes:
 ## Deployment
 
 - The frontend is deployed using Vercel. To deploy your frontend, push the changes to your GitHub repository and connect it with Vercel.
-- The backend is deployed through local server on Flask. 
+- The backend is deployed through Render. If you want to run the server locally, we use Flask.
 
 ## Contributing
 
