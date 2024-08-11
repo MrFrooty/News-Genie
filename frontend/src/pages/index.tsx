@@ -14,6 +14,8 @@ import { Dock, DockIcon } from '@/components/dock';
 import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 
+import API_BASE_URL from '@/services/api';
+
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
 
@@ -76,7 +78,7 @@ const LoginStatusCard = ({
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/logout', {
+      const response = await fetch(`${API_BASE_URL}/api/logout`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`
@@ -108,7 +110,7 @@ const LoginStatusCard = ({
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/profile', {
+      const response = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`
         }
