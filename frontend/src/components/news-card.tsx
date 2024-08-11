@@ -11,14 +11,21 @@ interface NewsCardProps {
   onShare: () => void;
 }
 
-const NewsCard: React.FC<NewsCardProps> = ({ title, description, url, onLike, onBookmark, onShare }) => {
+const NewsCard: React.FC<NewsCardProps> = ({
+  title,
+  description,
+  url,
+  onLike,
+  onBookmark,
+  onShare
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.div
       className="news-card bg-gray-800 text-white border border-gray-700 rounded-lg overflow-hidden shadow-lg"
       whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300 }}
+      transition={{ type: 'spring', stiffness: 300 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -26,9 +33,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ title, description, url, onLike, on
         <h2 className="text-xl font-semibold mb-2">{title}</h2>
         <p className="text-gray-300 mb-4">{description}</p>
         <div className="flex justify-between items-center">
-          <a 
-            href={url} 
-            target="_blank" 
+          <a
+            href={url}
+            target="_blank"
             rel="noopener noreferrer"
             className="text-green-400 hover:text-green-300"
           >
