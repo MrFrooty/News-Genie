@@ -4,7 +4,7 @@ const API_BASE_URL =
     : 'http://127.0.0.1:5000';
 
 export const fetchNews = async () => {
-  const response = await fetch(`${API_BASE_URL}/news`);
+  const response = await fetch(`${API_BASE_URL}/api/fetch_news`);
   if (!response.ok) {
     throw new Error('Failed to fetch news');
   }
