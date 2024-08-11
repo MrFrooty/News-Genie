@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 import { Label } from '@/components/label';
 import { Input } from '@/components/input';
 import { Button } from '@/components/button';
 import { Avatar, AvatarFallback } from '@/components/avatar';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
+
+import API_BASE_URL from '@/services/api';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
@@ -22,10 +24,6 @@ export default function SettingsPage() {
     variant: 'default' as 'default' | 'destructive'
   });
 
-  useEffect(() => {
-    fetchUserPreferences();
-  }, []);
-
   const showAlert = (message: string, variant: 'default' | 'destructive') => {
     setAlertInfo({
       show: true,
@@ -35,9 +33,9 @@ export default function SettingsPage() {
     setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
   };
 
-  const fetchUserPreferences = async () => {
+  const fetchUserPreferences = useCallback(async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/profile', {
+      const response = await axios.get(`${API_BASE_URL}/api/profile`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`
         }
@@ -59,13 +57,17 @@ export default function SettingsPage() {
         showAlert('An unexpected error occurred fetching preferences', 'destructive');
       }
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchUserPreferences();
+  }, [fetchUserPreferences]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        'http://127.0.0.1:5000/api/preferences',
+        `${API_BASE_URL}/api/preferences`,
         {
           categories,
           news_outlets: newsOutlets

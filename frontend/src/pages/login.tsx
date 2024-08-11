@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 import { Label } from '@/components/label';
 import { Input } from '@/components/input';
 import { Button } from '@/components/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
+
+import API_BASE_URL from '@/services/api';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
@@ -52,7 +54,7 @@ export default function AuthPage() {
     const endpoint = isLogin ? '/api/login' : '/api/register';
 
     try {
-      const response = await axios.post(`http://127.0.0.1:5000${endpoint}`, {
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, {
         email,
         password,
         first_name: firstName
