@@ -1,4 +1,4 @@
-# News-Genie
+# News Genie
 
 News-Genie is a web application designed to fetch and analyze news articles, providing users with insightful and up-to-date news information. The application is split into a backend using Firebase as our choice of database, developed with Flask in Python, and a frontend built using React, with deployment managed through Vercel.
 
@@ -60,7 +60,7 @@ The frontend structure includes:
    python app.py
    ```
 
-5. Be sure to add in your GOOGLE_API_KEY into .env
+5. Be sure to make sure that your .env matches the .env.template. Default port will be set to 10000 for Render hosting.
 
 #### Frontend
 
@@ -76,6 +76,9 @@ The frontend structure includes:
    ```bash
    pnpm dev
    ```
+OR 
+
+1. Visit https://news-genie.vercel.app/ for the production build. 
 
 ## Deployment
 
@@ -84,7 +87,7 @@ The frontend structure includes:
 
 ## Contributing
 
-Contributions to News-Genie are welcome! Please feel free to submit pull requests or open issues to discuss proposed changes or enhancements.
+Contributions to News Genie are welcome! Please feel free to submit pull requests or open issues to discuss proposed changes or enhancements.
 
 ## License
 
