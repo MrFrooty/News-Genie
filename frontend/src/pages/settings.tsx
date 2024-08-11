@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 import { Label } from '@/components/label';
 import { Input } from '@/components/input';
@@ -22,10 +22,6 @@ export default function SettingsPage() {
     variant: 'default' as 'default' | 'destructive'
   });
 
-  useEffect(() => {
-    fetchUserPreferences();
-  }, []);
-
   const showAlert = (message: string, variant: 'default' | 'destructive') => {
     setAlertInfo({
       show: true,
@@ -35,7 +31,7 @@ export default function SettingsPage() {
     setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
   };
 
-  const fetchUserPreferences = async () => {
+  const fetchUserPreferences = useCallback(async () => {
     try {
       const response = await axios.get('http://127.0.0.1:5000/api/profile', {
         headers: {
@@ -59,7 +55,11 @@ export default function SettingsPage() {
         showAlert('An unexpected error occurred fetching preferences', 'destructive');
       }
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchUserPreferences();
+  }, [fetchUserPreferences]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -20,11 +20,6 @@ import { jsPDF } from 'jspdf';
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
 
-interface Message {
-  text: string;
-  isUser: boolean;
-}
-
 interface Article {
   id: number;
   title: string;
