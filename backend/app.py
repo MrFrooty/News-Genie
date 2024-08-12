@@ -5,6 +5,7 @@ from flask_cors import CORS
 import os
 import logging
 import sys
+import json
 from datetime import timedelta
 from database import (
     connect_to_firebase,
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
-port = os.getenv("PORT");
+port = os.getenv("PORT")
 
 db = connect_to_firebase()
 
@@ -161,8 +162,8 @@ def fetch_news_route():
     user_context = get_user_context()
     logger.info(f"Fetching news for topic: {topic}")
     logger.info(f"User context used: {user_context}")
-    news_summaries = fetch_news(topic, user_context)
-    return jsonify({"news_summaries": news_summaries})
+    news_items = fetch_news(topic, user_context)
+    return jsonify({"news_items": json.loads(news_items)})
 
 
 @app.route("/api/delete_all_users", methods=["POST"])
