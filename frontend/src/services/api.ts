@@ -2,8 +2,8 @@ import axios from 'axios';
 
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
-    ? 'https://news-genie.onrender.com'  // Update this with your actual production URL
-    : 'http://127.0.0.1:5001';  // Changed port to 5001
+    ? 'https://news-genie.onrender.com'
+    : 'http://127.0.0.1:10000';
 
 export const fetchNews = async (topic: string, userContext: string = '') => {
   console.log('Attempting to fetch news from:', `${API_BASE_URL}/api/fetch_news`);
@@ -19,9 +19,10 @@ export const fetchNews = async (topic: string, userContext: string = '') => {
       {
         headers: {
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Credentials': 'true'
         },
-        withCredentials: true,
-        timeout: 30000, // Increased to 30 seconds timeout
+        // withCredentials: true,
+        timeout: 30000
       }
     );
 
