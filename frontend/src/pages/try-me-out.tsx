@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/input';
 import { Button } from '@/components/button';
@@ -237,18 +235,18 @@ const TryMeOut: React.FC = () => {
         }}
       />
 
-      <header className="relative z-10 py-4 px-6">
+      <header className="relative z-10 py-0 px-6">
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           <nav>
-            <Dock className="bg-white/5 backdrop-blur-sm border-gray-700/30 p-2 rounded-full flex space-x-4">
-              <DockIcon className="w-8 h-8 flex items-center justify-center">
+            <Dock className="bg-white/5 backdrop-blur-sm border-gray-700/30 p-2 rounded-full flex space-x-2">
+              <DockIcon className="w-10 h-10 flex items-center justify-center">
                 <Link href="/">
-                  <Home className="text-white h-4 w-4" />
+                  <Home className="text-white h-5 w-5" />
                 </Link>
               </DockIcon>
-              <DockIcon className="w-8 h-8 flex items-center justify-center">
+              <DockIcon className="w-10 h-10 flex items-center justify-center">
                 <Link href="/settings">
-                  <Settings className="text-white h-4 w-4" />
+                  <Settings className="text-white h-5 w-5" />
                 </Link>
               </DockIcon>
             </Dock>
@@ -256,12 +254,12 @@ const TryMeOut: React.FC = () => {
         </div>
       </header>
 
-      <div className="relative z-10 flex-grow flex flex-col px-4 md:px-8 lg:px-16 xl:px-32 overflow-y-auto mt-8 mb-6">
+      <div className="relative z-10 flex-grow flex flex-col px-8 md:px-16 lg:px-32 xl:px-48 overflow-y-auto mt-8 mb-8">
         <div className="text-center mb-8">
           <TypingAnimation text="News Genie Chat" duration={100} className="text-3xl font-bold" />
         </div>
 
-        <div className="flex-grow mb-4 pr-2" ref={chatContainerRef}>
+        <div className="flex-grow mb-6" ref={chatContainerRef}>
           <AnimatePresence>
             {isInitialLoading ? (
               <ChatMessage message="" isUser={false} isLoading={true} />
@@ -281,9 +279,9 @@ const TryMeOut: React.FC = () => {
         </div>
 
         {activeNewsState.messageIndex !== null && activeNewsState.articles.length > 0 && (
-          <div className="mb-4 bg-gray-800/30 p-4 rounded-3xl" ref={newsRecommendationsRef}>
+          <div className="mb-6 bg-gray-800/30 p-6 rounded-3xl" ref={newsRecommendationsRef}>
             <h3 className="text-lg font-bold mb-4">News Recommendations</h3>
-            <div className="flex space-x-2 overflow-x-auto pb-2 -mx-2">
+            <div className="flex space-x-4 overflow-x-auto pb-4 -mx-2">
               <AnimatePresence>
                 {activeNewsState.articles.map((article, index) => (
                   <NewsTile
@@ -305,10 +303,10 @@ const TryMeOut: React.FC = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="mt-4 bg-gray-700/50 p-4 rounded-3xl"
+                  className="mt-6 bg-gray-700/50 p-6 rounded-3xl"
                 >
-                  <h3 className="font-bold text-lg mb-2">{expandedArticle.title}</h3>
-                  <p className="text-sm mb-2">{expandedArticle.fullPreview}</p>
+                  <h3 className="font-bold text-lg mb-3">{expandedArticle.title}</h3>
+                  <p className="text-sm mb-3">{expandedArticle.fullPreview}</p>
                   <a
                     href={expandedArticle.url}
                     target="_blank"
@@ -323,18 +321,18 @@ const TryMeOut: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="flex items-center space-x-3 mb-6">
           <Input
             type="text"
             placeholder="Type your message..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            className="flex-grow bg-gray-800/30 border-gray-700 rounded-full text-white placeholder-gray-400"
+            className="flex-grow bg-gray-800/30 border-gray-700 rounded-full text-white placeholder-gray-400 px-6 py-3"
           />
           <Button
             onClick={handleSendMessage}
-            className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6"
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6 py-3"
           >
             <Send className="h-5 w-5" />
           </Button>
