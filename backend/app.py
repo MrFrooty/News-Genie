@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+port = os.getenv("PORT");
 
 db = connect_to_firebase()
 
@@ -174,5 +175,5 @@ def delete_all_users_route():
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 10000))
+    port = int(os.getenv("PORT", port))
     app.run(host="0.0.0.0", port=port, debug=True)
