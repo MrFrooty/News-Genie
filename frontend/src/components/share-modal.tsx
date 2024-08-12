@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article } from './news-tile';
+import Image from 'next/image';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -62,7 +63,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, article }) => 
                   rel="noopener noreferrer"
                   className="flex flex-col items-center justify-center p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                 >
-                  <img src={`/icons/${option.icon}`} alt={option.name} className="w-8 h-8 mb-2" />
+                  <Image src={`/icons/${option.icon}`} alt={option.name} className="w-8 h-8 mb-2" />
                   <span className="text-sm">{option.name}</span>
                 </a>
               ))}

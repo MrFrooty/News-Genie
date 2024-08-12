@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/input';
 import { Button } from '@/components/button';

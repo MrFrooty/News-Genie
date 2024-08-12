@@ -15,6 +15,7 @@ export default function TypingAnimation({ text, duration = 200, className }: Typ
   const [i, setI] = useState<number>(0);
 
   useEffect(() => {
+    setDisplayedText('');
     const typingEffect = setInterval(() => {
       if (i < text.length) {
         setDisplayedText(text.substring(0, i + 1));
