@@ -33,7 +33,7 @@ const ChatMessage: React.FC<{
     exit={{ opacity: 0, y: -20 }}
     transition={{ duration: 0.3 }}
     onClick={onClick}
-    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-2 cursor-pointer`}
+    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-2 ${isUser ? 'cursor-pointer' : ''}`}
   >
     {isLoading ? (
       <LoadingAnimation />
@@ -59,7 +59,6 @@ const TryMeOut: React.FC = () => {
     }>
   >([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [newsRecommendations, setNewsRecommendations] = useState<Article[]>([]);
   const [expandedArticle, setExpandedArticle] = useState<Article | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -67,8 +66,13 @@ const TryMeOut: React.FC = () => {
   const newsRecommendationsRef = useRef<HTMLDivElement>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedArticleForShare, setSelectedArticleForShare] = useState<Article | null>(null);
-  const [displayedNews, setDisplayedNews] = useState<Article[]>([]);
-  const [isNewsTileVisible, setIsNewsTileVisible] = useState(false);
+  const [activeNewsState, setActiveNewsState] = useState<{
+    messageIndex: number | null;
+    articles: Article[];
+  }>({
+    messageIndex: null,
+    articles: []
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,62 +93,47 @@ const TryMeOut: React.FC = () => {
   }, [messages]);
 
   const parseNewsRecommendations = (aiResponse: string): Article[] => {
-    console.log('Parsing AI response:', aiResponse);
     const articles: Article[] = [];
+    const newsItems = aiResponse.split(/\n\d+\.\s*/).filter((item) => item.trim() !== '');
 
-    const newsItems = aiResponse.split(/\n\d+\.\s*\*\*/).filter((item) => item.trim() !== '');
+    newsItems.forEach((item, index) => {
+      const titleMatch = item.match(/\*\*(.*?):?\*\*/);
+      const title = titleMatch ? titleMatch[1].trim() + ':' : '';
+      let content = item.replace(/^\*\*.*?\*\*:?\s*/, '').trim();
 
-    newsItems.slice(0, 5).forEach((item, index) => {
-      const content = item.replace(/^\*\*|\*\*$/g, '').trim();
-      const titleEnd = content.indexOf('** ');
-
-      let title = '';
-      let description = '';
+      const sourceMatch = content.match(/\(Source:\s*\[(.*?)\]\((.*?)\)\)$/);
       let source = '';
       let url = '';
-
-      if (titleEnd !== -1) {
-        title = content.substring(0, titleEnd).trim();
-        description = content.substring(titleEnd + 1).trim();
-      } else {
-        title = content;
-      }
-
-      const sourceMatch = description.match(/\(Source:\s*\[(.*?)\]\((.*?)\)\)$/);
       if (sourceMatch) {
         source = sourceMatch[1];
         url = sourceMatch[2];
-        description = description.replace(/\s*\(Source:.*?\)$/, '').trim();
+        content = content.replace(/\s*\(Source:.*?\)$/, '').trim();
       }
 
       articles.push({
         id: index + 1,
         title: title,
-        briefPreview: description,
-        fullPreview: description,
+        briefPreview: content.length > 150 ? content.substring(0, 150) + '...' : content,
+        fullPreview: content,
         url: url,
         source: source,
         isLiked: false
       });
     });
 
-    console.log('Parsed articles:', articles);
     return articles;
   };
 
   const handleSendMessage = async () => {
     if (inputMessage.trim()) {
-      setMessages([
-        ...messages,
-        {
-          text: inputMessage,
-          isUser: true,
-          associatedNews: displayedNews
-        }
-      ]);
+      const newUserMessage = {
+        text: inputMessage,
+        isUser: true
+      };
+      setMessages((prevMessages) => [...prevMessages, newUserMessage]);
       setInputMessage('');
       setExpandedArticle(null);
-      setIsNewsTileVisible(false);
+      setActiveNewsState({ messageIndex: null, articles: [] });
 
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -156,20 +145,25 @@ const TryMeOut: React.FC = () => {
         const response = await fetchNews(inputMessage);
         console.log('API response:', response);
 
-        setMessages((prevMessages) => {
-          const newMessages = [...prevMessages];
-          newMessages[newMessages.length - 1] = {
-            text: 'Based on your interest, here are some news recommendations:',
-            isUser: false,
-            isLoading: false
-          };
-          return newMessages;
-        });
-
         if (response && response.news_summaries) {
           const parsedRecommendations = parseNewsRecommendations(response.news_summaries);
-          console.log('Parsed recommendations:', parsedRecommendations);
-          setDisplayedNews(parsedRecommendations);
+
+          setMessages((prevMessages) => {
+            const newMessages = [...prevMessages];
+            const aiResponseIndex = newMessages.length - 1;
+            newMessages[aiResponseIndex] = {
+              text: 'Based on your interest, here are some news recommendations:',
+              isUser: false,
+              isLoading: false,
+              associatedNews: parsedRecommendations
+            };
+            return newMessages;
+          });
+
+          setActiveNewsState({
+            messageIndex: messages.length + 1,
+            articles: parsedRecommendations
+          });
         } else {
           throw new Error('Invalid response format');
         }
@@ -196,10 +190,21 @@ const TryMeOut: React.FC = () => {
 
   const handleMessageClick = (index: number) => {
     const clickedMessage = messages[index];
-    if (clickedMessage.associatedNews) {
-      setDisplayedNews(clickedMessage.associatedNews);
-      setExpandedArticle(null);
-      setIsNewsTileVisible(true);
+    if (clickedMessage.isUser) {
+      const nextMessage = messages[index + 1];
+      if (nextMessage && nextMessage.associatedNews) {
+        setActiveNewsState((prevState) => {
+          if (prevState.messageIndex === index + 1) {
+            return { messageIndex: null, articles: [] };
+          } else {
+            return {
+              messageIndex: index + 1,
+              articles: nextMessage.associatedNews || []
+            };
+          }
+        });
+        setExpandedArticle(null);
+      }
     }
   };
 
@@ -208,11 +213,12 @@ const TryMeOut: React.FC = () => {
   };
 
   const handleLike = (articleId: number) => {
-    setNewsRecommendations((prevRecommendations) =>
-      prevRecommendations.map((article) =>
+    setActiveNewsState((prevState) => ({
+      ...prevState,
+      articles: prevState.articles.map((article) =>
         article.id === articleId ? { ...article, isLiked: !article.isLiked } : article
       )
-    );
+    }));
   };
 
   const handleShare = (article: Article) => {
@@ -266,7 +272,7 @@ const TryMeOut: React.FC = () => {
                   message={msg.text}
                   isUser={msg.isUser}
                   isLoading={msg.isLoading}
-                  onClick={() => handleMessageClick(index)}
+                  onClick={msg.isUser ? () => handleMessageClick(index) : undefined}
                 />
               ))
             )}
@@ -274,12 +280,12 @@ const TryMeOut: React.FC = () => {
           <div ref={bottomRef} />
         </div>
 
-        {displayedNews.length > 0 && (
-          <div className="mb-4 bg-gray-800/30 p-4 rounded-lg" ref={newsRecommendationsRef}>
+        {activeNewsState.messageIndex !== null && activeNewsState.articles.length > 0 && (
+          <div className="mb-4 bg-gray-800/30 p-4 rounded-3xl" ref={newsRecommendationsRef}>
             <h3 className="text-lg font-bold mb-4">News Recommendations</h3>
             <div className="flex space-x-2 overflow-x-auto pb-2 -mx-2">
               <AnimatePresence>
-                {displayedNews.map((article, index) => (
+                {activeNewsState.articles.map((article, index) => (
                   <NewsTile
                     key={article.id}
                     article={article}
@@ -299,7 +305,7 @@ const TryMeOut: React.FC = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="mt-4 bg-gray-700/50 p-4 rounded-lg"
+                  className="mt-4 bg-gray-700/50 p-4 rounded-3xl"
                 >
                   <h3 className="font-bold text-lg mb-2">{expandedArticle.title}</h3>
                   <p className="text-sm mb-2">{expandedArticle.fullPreview}</p>

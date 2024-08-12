@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article } from './news-tile';
-import Image from 'next/image';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -50,7 +49,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, article }) => 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-gray-800 p-6 rounded-xl max-w-md w-full"
+            className="bg-gray-800 p-6 rounded-xl max-w-md w-full h-[500px] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">Share this article</h2>
@@ -63,12 +62,12 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, article }) => 
                   rel="noopener noreferrer"
                   className="flex flex-col items-center justify-center p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                 >
-                  <Image src={`/icons/${option.icon}`} alt={option.name} className="w-8 h-8 mb-2" />
+                  <img src={`/icons/${option.icon}`} alt={option.name} className="w-8 h-8 mb-2" />
                   <span className="text-sm">{option.name}</span>
                 </a>
               ))}
             </div>
-            <div className="mt-6">
+            <div className="flex-grow overflow-y-auto py-3">
               <h3 className="font-semibold mb-2">{article.title}</h3>
               <p className="text-sm text-gray-400 mb-4">{article.briefPreview}</p>
             </div>
