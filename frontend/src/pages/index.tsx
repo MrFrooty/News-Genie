@@ -381,9 +381,10 @@ const LandingPage: React.FC = () => {
               About News Genie
             </h2>
             <p style={{ fontSize: '1.25rem', marginBottom: '2rem' }}>
-              News Genie is a personalized news aggregator that uses AI to curate articles based on
-              your interests and preferences. Stay informed with tailored news recommendations and
-              real-time analysis.
+              News Genie is a web application that provides users with a comprehensive and easily
+              searchable archive of news articles, enriched by real-time updates and enhanced search
+              capabilities through the Gemini API, allowing users to efficiently find articles on
+              topics of interest.
             </p>
           </div>
         </ParallaxLayer>

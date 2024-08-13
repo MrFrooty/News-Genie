@@ -10,6 +10,7 @@ import TypingAnimation from '@/components/typing-animation';
 import { fetchNews } from '@/services/api';
 import NewsTile, { Article } from '@/components/news-tile';
 import ShareModal from '@/components/share-modal';
+import { Alert, AlertTitle, AlertDescription } from '@/components/alert';
 
 const url = (name: string, wrap = false) =>
   `${wrap ? 'url(' : ''}https://awv3node-homepage.surge.sh/build/assets/${name}.svg${wrap ? ')' : ''}`;
@@ -70,6 +71,11 @@ const TryMeOut: React.FC = () => {
   }>({
     messageIndex: null,
     articles: []
+  });
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: '',
+    variant: 'default' as 'default' | 'destructive'
   });
 
   useEffect(() => {
@@ -204,6 +210,20 @@ const TryMeOut: React.FC = () => {
     setIsShareModalOpen(true);
   };
 
+  const handleSettingsClick = () => {
+    const isLoggedIn = !!localStorage.getItem('access_token');
+    if (!isLoggedIn) {
+      setAlertInfo({
+        show: true,
+        message: 'You need to be logged in to access the settings page.',
+        variant: 'destructive'
+      });
+      setTimeout(() => setAlertInfo({ show: false, message: '', variant: 'default' }), 3000);
+    } else {
+      console.log('Navigating to settings page');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#253237] text-white overflow-hidden relative flex flex-col">
       <div
@@ -225,9 +245,7 @@ const TryMeOut: React.FC = () => {
                 </Link>
               </DockIcon>
               <DockIcon className="w-8 h-8 flex items-center justify-center">
-                <Link href="/settings">
-                  <Settings className="text-white h-4 w-4" />
-                </Link>
+                <Settings className="text-white h-4 w-4" onClick={handleSettingsClick} />
               </DockIcon>
             </Dock>
           </nav>
@@ -324,6 +342,25 @@ const TryMeOut: React.FC = () => {
         onClose={() => setIsShareModalOpen(false)}
         article={selectedArticleForShare}
       />
+
+      <AnimatePresence>
+        {alertInfo.show && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-8 right-8 w-auto z-50"
+          >
+            <Alert variant={alertInfo.variant} className="border bg-background text-foreground">
+              <AlertTitle className="text-lg font-semibold">
+                {alertInfo.variant === 'destructive' ? 'Error' : 'Success'}
+              </AlertTitle>
+              <AlertDescription className="text-sm">{alertInfo.message}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
