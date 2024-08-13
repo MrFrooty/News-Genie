@@ -261,7 +261,7 @@ const TryMeOut: React.FC = () => {
         {activeNewsState.messageIndex !== null && activeNewsState.articles.length > 0 && (
           <div className="mb-4 bg-gray-800/30 p-4 rounded-3xl" ref={newsRecommendationsRef}>
             <h3 className="text-lg font-bold mb-4">News Recommendations</h3>
-            <div className="flex space-x-2 overflow-x-auto pb-2 -mx-2">
+            <div className="flex space-x-4 overflow-x-auto pb-2 -mx-2">
               <AnimatePresence>
                 {activeNewsState.articles.map((article, index) => (
                   <NewsTile
@@ -291,7 +291,7 @@ const TryMeOut: React.FC = () => {
                     href={expandedArticle.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline"
+                    className="text-blue-400 hover:underline"z
                   >
                     Learn More
                   </a>
