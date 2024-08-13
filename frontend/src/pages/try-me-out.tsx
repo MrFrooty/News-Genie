@@ -90,36 +90,16 @@ const TryMeOut: React.FC = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const parseNewsRecommendations = (aiResponse: string): Article[] => {
-    const articles: Article[] = [];
-    const newsItems = aiResponse.split(/\n\d+\.\s*/).filter((item) => item.trim() !== '');
-
-    newsItems.forEach((item, index) => {
-      const titleMatch = item.match(/\*\*(.*?):?\*\*/);
-      const title = titleMatch ? titleMatch[1].trim() + ':' : '';
-      let content = item.replace(/^\*\*.*?\*\*:?\s*/, '').trim();
-
-      const sourceMatch = content.match(/\(Source:\s*\[(.*?)\]\((.*?)\)\)$/);
-      let source = '';
-      let url = '';
-      if (sourceMatch) {
-        source = sourceMatch[1];
-        url = sourceMatch[2];
-        content = content.replace(/\s*\(Source:.*?\)$/, '').trim();
-      }
-
-      articles.push({
-        id: index + 1,
-        title: title,
-        briefPreview: content.length > 150 ? content.substring(0, 150) + '...' : content,
-        fullPreview: content,
-        url: url,
-        source: source,
-        isLiked: false
-      });
-    });
-
-    return articles;
+  const parseNewsRecommendations = (newsItems: any[]): Article[] => {
+    return newsItems.map((item, index) => ({
+      id: index + 1,
+      title: item[1],
+      briefPreview: item[2].length > 150 ? item[2].substring(0, 150) + '...' : item[2],
+      fullPreview: item[2],
+      url: item[4],
+      source: item[3],
+      isLiked: false
+    }));
   };
 
   const handleSendMessage = async () => {
@@ -143,8 +123,8 @@ const TryMeOut: React.FC = () => {
         const response = await fetchNews(inputMessage);
         console.log('API response:', response);
 
-        if (response && response.news_summaries) {
-          const parsedRecommendations = parseNewsRecommendations(response.news_summaries);
+        if (response && Array.isArray(response.news_items)) {
+          const parsedRecommendations = parseNewsRecommendations(response.news_items);
 
           setMessages((prevMessages) => {
             const newMessages = [...prevMessages];
@@ -169,7 +149,7 @@ const TryMeOut: React.FC = () => {
         console.error('Error fetching news:', error);
         let errorMessage = 'Sorry, I encountered an error while fetching news. ';
         if (error instanceof Error) {
-          errorMessage += `Error details: ${error.message}`;
+          errorMessage += error.message;
         } else {
           errorMessage += 'Please try again later.';
         }
@@ -238,15 +218,15 @@ const TryMeOut: React.FC = () => {
       <header className="relative z-10 py-0 px-6">
         <div className="max-w-7xl mx-auto flex justify-end items-center">
           <nav>
-            <Dock className="bg-white/5 backdrop-blur-sm border-gray-700/30 p-2 rounded-full flex space-x-2">
-              <DockIcon className="w-10 h-10 flex items-center justify-center">
+            <Dock className="bg-white/5 backdrop-blur-sm border-gray-700/30 p-3 rounded-full flex space-x-4">
+              <DockIcon className="w-8 h-8 flex items-center justify-center">
                 <Link href="/">
-                  <Home className="text-white h-5 w-5" />
+                  <Home className="text-white h-4 w-4" />
                 </Link>
               </DockIcon>
-              <DockIcon className="w-10 h-10 flex items-center justify-center">
+              <DockIcon className="w-8 h-8 flex items-center justify-center">
                 <Link href="/settings">
-                  <Settings className="text-white h-5 w-5" />
+                  <Settings className="text-white h-4 w-4" />
                 </Link>
               </DockIcon>
             </Dock>
@@ -254,12 +234,12 @@ const TryMeOut: React.FC = () => {
         </div>
       </header>
 
-      <div className="relative z-10 flex-grow flex flex-col px-8 md:px-16 lg:px-32 xl:px-48 overflow-y-auto mt-8 mb-8">
+      <div className="relative z-10 flex-grow flex flex-col px-4 md:px-8 lg:px-16 xl:px-32 overflow-y-auto mt-8 mb-6">
         <div className="text-center mb-8">
           <TypingAnimation text="News Genie Chat" duration={100} className="text-3xl font-bold" />
         </div>
 
-        <div className="flex-grow mb-6" ref={chatContainerRef}>
+        <div className="flex-grow mb-4 pr-2" ref={chatContainerRef}>
           <AnimatePresence>
             {isInitialLoading ? (
               <ChatMessage message="" isUser={false} isLoading={true} />
@@ -279,9 +259,9 @@ const TryMeOut: React.FC = () => {
         </div>
 
         {activeNewsState.messageIndex !== null && activeNewsState.articles.length > 0 && (
-          <div className="mb-6 bg-gray-800/30 p-6 rounded-3xl" ref={newsRecommendationsRef}>
+          <div className="mb-4 bg-gray-800/30 p-4 rounded-3xl" ref={newsRecommendationsRef}>
             <h3 className="text-lg font-bold mb-4">News Recommendations</h3>
-            <div className="flex space-x-4 overflow-x-auto pb-4 -mx-2">
+            <div className="flex space-x-2 overflow-x-auto pb-2 -mx-2">
               <AnimatePresence>
                 {activeNewsState.articles.map((article, index) => (
                   <NewsTile
@@ -303,17 +283,17 @@ const TryMeOut: React.FC = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="mt-6 bg-gray-700/50 p-6 rounded-3xl"
+                  className="mt-4 bg-gray-700/50 p-4 rounded-3xl"
                 >
-                  <h3 className="font-bold text-lg mb-3">{expandedArticle.title}</h3>
-                  <p className="text-sm mb-3">{expandedArticle.fullPreview}</p>
+                  <h3 className="font-bold text-lg mb-2">{expandedArticle.title}</h3>
+                  <p className="text-sm mb-2">{expandedArticle.fullPreview}</p>
                   <a
                     href={expandedArticle.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:underline"
                   >
-                    Read full article
+                    Learn More
                   </a>
                 </motion.div>
               )}
@@ -321,18 +301,18 @@ const TryMeOut: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center space-x-3 mb-6">
+        <div className="flex items-center space-x-2 mb-4">
           <Input
             type="text"
             placeholder="Type your message..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            className="flex-grow bg-gray-800/30 border-gray-700 rounded-full text-white placeholder-gray-400 px-6 py-3"
+            className="flex-grow bg-gray-800/30 border-gray-700 rounded-full text-white placeholder-gray-400"
           />
-          <Button
+        <Button
             onClick={handleSendMessage}
-            className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6 py-3"
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6"
           >
             <Send className="h-5 w-5" />
           </Button>
