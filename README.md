@@ -78,7 +78,8 @@ The frontend structure includes:
    ```
 OR 
 
-1. Visit https://news-genie.vercel.app/ for the production build. 
+1. Visit https://news-genie.vercel.app/ for the production build.
+2. Backend prod is directly linked to MrrFrooty's port 10000 status, so if the Backend is down it is most likely because MrrFrooty has shut down his 10000 port.
 
 ## Deployment
 
