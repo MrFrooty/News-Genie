@@ -56,17 +56,16 @@ def get_user_context():
         current_user = get_jwt_identity()
         if current_user:
             preferences = get_user_preferences(current_user)
-            context = (
-                f"The user prefers news about {', '.join(preferences.get('categories', []))} "
-                f"from sources like {', '.join(preferences.get('news_outlets', []))}. "
-            )
+            categories = preferences.get("categories", [])
+            news_outlets = preferences.get("news_outlets", [])
+            context = {"categories": categories, "news_outlets": news_outlets}
             logger.info(f"User context retrieved: {context}")
             return context
         else:
             logger.info("No user context available (user not authenticated)")
     except Exception as e:
         logger.error(f"Error retrieving user context: {str(e)}")
-    return ""
+    return {"categories": [], "news_outlets": []}
 
 
 @app.route("/api/register", methods=["POST"])

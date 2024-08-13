@@ -11,7 +11,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def fetch_news(topic, user_context=""):
+def fetch_news(topic, user_context):
+    categories = ", ".join(user_context.get("categories", []))
+    news_outlets = ", ".join(user_context.get("news_outlets", []))
+
     system_context = f"""
     Objective: Provide a summary of the five most recent and relevant news topics based on the user's input and account preferences (if available). The summary should be tailored to the user's interests, covering specific topics and news sources, and should maintain a professional yet relaxed tone. All information must be verifiable, cited, and factual.
 
@@ -28,7 +31,9 @@ def fetch_news(topic, user_context=""):
     10. If there are not enough recent, relevant news items, inform the user that there is limited recent news on the topic.
     11. Format the response as a JSON object with the structure: [["1", "News Title", "News Description", "Source (including formatted publication date)"], ...].
 
-    User Context: {user_context}
+    User Context:
+    Preferred categories: {categories}
+    Preferred news outlets: {news_outlets}
     """
     logger.info(f"Fetching news for topic: {topic}")
     logger.info(f"User context: {user_context}")
