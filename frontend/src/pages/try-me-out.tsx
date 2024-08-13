@@ -288,10 +288,10 @@ const TryMeOut: React.FC = () => {
                   <h3 className="font-bold text-lg mb-2">{expandedArticle.title}</h3>
                   <p className="text-sm mb-2">{expandedArticle.fullPreview}</p>
                   <a
-                    href={expandedArticle.url}
+                    href={`https://www.google.com/search?q=${encodeURIComponent(`${expandedArticle.title} ${expandedArticle.source}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline"z
+                    className="text-blue-400 hover:underline"
                   >
                     Learn More
                   </a>
@@ -310,7 +310,7 @@ const TryMeOut: React.FC = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             className="flex-grow bg-gray-800/30 border-gray-700 rounded-full text-white placeholder-gray-400"
           />
-        <Button
+          <Button
             onClick={handleSendMessage}
             className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6"
           >

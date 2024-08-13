@@ -21,14 +21,7 @@ interface NewsTileProps {
   onShare: (article: Article) => void;
 }
 
-const NewsTile: React.FC<NewsTileProps> = ({
-  article,
-  articleNumber,
-  onClick,
-  isSelected,
-  onLike,
-  onShare
-}) => {
+const NewsTile: React.FC<NewsTileProps> = ({ article, onClick, isSelected, onLike, onShare }) => {
   return (
     <motion.div
       layout
@@ -69,7 +62,7 @@ const NewsTile: React.FC<NewsTileProps> = ({
         </div>
       </div>
       <a
-        href={article.url}
+        href={`https://www.google.com/search?q=${encodeURIComponent(`${article.title} ${article.source}`)}`}
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}

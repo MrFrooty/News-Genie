@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? 'https://news-genie.onrender.com'
-    : 'http://127.0.0.1:5001';
+    : 'http://127.0.0.1:10000';
 
 export const fetchNews = async (topic: string, userContext: string = '') => {
   console.log('Attempting to fetch news from:', `${API_BASE_URL}/api/fetch_news`);
@@ -41,9 +41,13 @@ export const fetchNews = async (topic: string, userContext: string = '') => {
         throw new Error(`Server error: ${error.response.status}`);
       } else if (error.request) {
         console.error('No response received:', error.request);
-        throw new Error('No response received from the server. Please check your internet connection and try again.');
+        throw new Error(
+          'No response received from the server. Please check your internet connection and try again.'
+        );
       }
-      throw new Error(`Network error: ${error.message}. Please check your internet connection and try again.`);
+      throw new Error(
+        `Network error: ${error.message}. Please check your internet connection and try again.`
+      );
     } else {
       console.error('Unexpected error:', error);
       throw new Error('An unexpected error occurred. Please try again later.');
