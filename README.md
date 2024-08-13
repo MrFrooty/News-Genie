@@ -86,6 +86,9 @@ OR
 - The frontend is deployed using Vercel. To deploy your frontend, push the changes to your GitHub repository and connect it with Vercel.
 - The backend is deployed through Render. If you want to run the server locally, we use Flask.
 
+## Demo Video
+[![Watch the video](https://img.youtube.com/vi/V9jR_agnCzI/maxresdefault.jpg)](https://www.youtube.com/watch?v=V9jR_agnCzI)
+
 ## Contributing
 
 Contributions to News Genie are welcome! Please feel free to submit pull requests or open issues to discuss proposed changes or enhancements.
