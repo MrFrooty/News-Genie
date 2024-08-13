@@ -57,12 +57,6 @@ def fetch_news(topic, user_context):
     try:
         news_items = json.loads(response)
 
-        for item in news_items:
-            google_search_url = (
-                f"https://www.google.com/search?q={urllib.parse.quote(item[1])}"
-            )
-            item.append(google_search_url)
-
         return json.dumps(news_items)
     except json.JSONDecodeError:
         logger.error("Failed to parse news response as JSON")
