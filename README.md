@@ -1,13 +1,13 @@
 # News Genie
 
-News-Genie is a web application designed to fetch and analyze news articles, providing users with insightful and up-to-date news information. The application is split into a backend using Firebase as our choice of database, developed with Flask in Python, and a frontend built using React, with deployment managed through Vercel.
+News Genie is a web application designed to serve as an article source archive, allowing users to find and retrieve news articles related to specific topics. The application is divided into a backend, using Firebase for database management and developed with Flask in Python, and a frontend built using React, with deployment handled through Vercel.
 
 ## Project Structure
 
 The project is organized into two main directories:
 
-- `backend/`: Contains the Flask application with Python scripts for fetching and analyzing news.
-- `frontend/`: Houses the React application, designed to provide a user-friendly interface for interacting with the news content.
+- `backend/`: Contains the Flask application with Python scripts for fetching and storing news sources.
+- `frontend/`: Houses the React application, designed to provide a user-friendly interface for interacting with the archive.
 
 ### Backend
 
@@ -15,8 +15,8 @@ The backend is structured as follows:
 
 - `app.py`: Entry point for the Flask application.
 - `database.py`: Manages Firebase database interactions.
-- `news_analyzer.py`: Contains logic for analyzing news data.
-- `news_fetcher.py`: Responsible for fetching news from various sources.
+- `news_analyzer.py`: Contains logic for categorizing and organizing news sources.
+- `news_fetcher.py`: Responsible for fetching news from various sources and storing them in the archive.
 - `requirements.txt`: Lists all Python dependencies for production.
 - `requirements-dev.txt`: Lists all Python dependencies for development.
 
@@ -26,7 +26,7 @@ The frontend structure includes:
 
 - `src/`: Contains all the source files for the React application.
   - `components/`: React components like `NewsCard.tsx` and `NewsFeed.tsx`.
-  - `services/`: Services like `api.ts` which handle API calls to the backend.
+  - `services/`: Services like `api.ts` that handle API calls to the backend.
   - `app.tsx`: The main React component that ties the application together.
   - `globals.css`: Global CSS styles.
 
