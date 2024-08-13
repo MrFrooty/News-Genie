@@ -87,7 +87,8 @@ OR
 - The backend is deployed through Render. If you want to run the server locally, we use Flask.
 
 ## Demo Video
-[![Watch the video](https://img.youtube.com/vi/V9jR_agnCzI/maxresdefault.jpg)](https://www.youtube.com/watch?v=V9jR_agnCzI)
+[[![Watch the video](https://img.youtube.com/vi/V9jR_agnCzI/maxresdefault.jpg)](https://www.youtube.com/watch?v=V9jR_agnCzI)](https://github.com/user-attachments/assets/acdf7a18-2f73-4a86-a97c-4c5cba048942
+)
 
 ## Contributing
 
