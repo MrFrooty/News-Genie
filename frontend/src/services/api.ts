@@ -21,14 +21,13 @@ export const fetchNews = async (topic: string, userContext: string = '') => {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Credentials': 'true'
         },
-        // withCredentials: true,
         timeout: 30000
       }
     );
 
     console.log('API response:', response.data);
 
-    if (!response.data || !response.data.news_summaries) {
+    if (!response.data || !Array.isArray(response.data.news_items)) {
       throw new Error('Invalid response format');
     }
 
@@ -36,21 +35,22 @@ export const fetchNews = async (topic: string, userContext: string = '') => {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Axios error:', error.message);
-      console.error('Error config:', error.config);
-      if (error.code === 'ECONNABORTED') {
-        console.error('Request timed out');
-      }
       if (error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
+        throw new Error(`Server error: ${error.response.status}`);
       } else if (error.request) {
         console.error('No response received:', error.request);
+        throw new Error(
+          'No response received from the server. Please check your internet connection and try again.'
+        );
       }
-      throw new Error(`Axios error: ${error.message}`);
+      throw new Error(
+        `Network error: ${error.message}. Please check your internet connection and try again.`
+      );
     } else {
       console.error('Unexpected error:', error);
-      throw error;
+      throw new Error('An unexpected error occurred. Please try again later.');
     }
   }
 };
